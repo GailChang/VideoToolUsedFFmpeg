@@ -1,0 +1,104 @@
+# Build results
+*/bin/**
+*/obj/**
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+[Bb]uild/
+[Bb]uilds/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vscode/
+
+# Executables and binaries
+*.exe
+*.dll
+*.zip
+*.7z
+*.rar
+
+# Configuration files with sensitive data
+appsettings.json
+appsettings.*.json
+!appsettings.sample.json
+
+# FFmpeg binaries (users need to download separately)
+Resources/ffmpeg.exe
+Resources/ffprobe.exe
+Resources/*.zip
+Resources/*.7z
+
+# Temporary files
+mylist.txt
+*.tmp
+*.temp
+*.ts
+temp*.ts
+
+# Video/Audio files (avoid committing test media files)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.m4a
+
+# Image files
+*.gif
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Log files
+*.log
+*_log.txt
+psnr_log.txt
+ssim_log.txt
+vmaf_log.txt
+ffmpeg_*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+*.swp
+*~
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# User-specific files
+*.pidb
+*.sln.iml
