@@ -79,12 +79,12 @@ namespace ConvertVideo2GIF
             string outputFile = Console.ReadLine() ?? "";
 
             Console.Write("請輸入開始時間(格式: HH:MM:SS，預設00:00:00): ");
-            string startTime = Console.ReadLine() ?? "";
+            string? startTime = Console.ReadLine();
 
             Console.Write("請輸入結束時間(格式: HH:MM:SS): ");
-            string endTime = Console.ReadLine() ?? "";
+            string? endTime = Console.ReadLine();
 
-            await CutVideo(inputFile, outputFile, startTime, endTime);
+            await CutVideo(inputFile, outputFile, string.IsNullOrEmpty(startTime) ? "00:00:00" : startTime, string.IsNullOrEmpty(endTime) ? "00:00:00" : endTime);
         }
 
         private static async Task HandleMergeVideo()
@@ -158,7 +158,7 @@ namespace ConvertVideo2GIF
         /// <param name="oFileName">輸出檔名</param>
         /// <param name="startTime">開始時間</param>
         /// <param name="endTime">結束時間</param>
-        private static async Task CutVideo(string iFileName, string oFileName, string startTime = "00:00:00", string endTime = "00:00:00")
+        private static async Task CutVideo(string iFileName, string oFileName, string startTime, string endTime)
         {
             if (string.IsNullOrEmpty(oFileName)) oFileName = iFileName + " - output";
             DirPathObj dirObj = new DirPathObj(iFileName, oFileName, ".mp4", ".mp4");
