@@ -102,3 +102,4 @@ _ReSharper*/
 # User-specific files
 *.pidb
 *.sln.iml
+/ConvertVideo2GIF/Properties/PublishProfiles/FolderProfile.pubxml
