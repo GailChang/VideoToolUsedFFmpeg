@@ -54,7 +54,7 @@ namespace ConvertVideo2GIF.Models
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"讀取設定檔失敗: {ex.Message}，使用預設工作目錄");
+                Console.WriteLine($"讀取設定檔失敗: {ex.Message}，使用預設工作目錄: 使用者/Downloads/");
                 _cachedWorkingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads") + Path.DirectorySeparatorChar;
             }
 

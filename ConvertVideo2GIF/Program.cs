@@ -24,6 +24,8 @@ namespace ConvertVideo2GIF
                 Console.WriteLine("ffmpeg.exe not found in the Resources folder. Please check the folder and make sure you unzip the ffmpeg.zip.");
                 return;
             }
+            // Check the working directory exists
+            Console.WriteLine($"當前 Working directory {dirObj.workingDir} {Environment.NewLine}");
 
             Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss") + "程式執行開始!");
 
@@ -34,6 +36,8 @@ namespace ConvertVideo2GIF
                 Console.WriteLine("2. 合併影片 (MergeVideo)");
                 Console.WriteLine("3. 調整音量 (AdjustVolume)");
                 Console.WriteLine("4. 合併音訊和影片 (CombineAudioAndVideo)");
+                Console.WriteLine("5. 壓縮轉檔影片 (CompressVideo)");
+                Console.WriteLine("6. 提取字幕 (ExtractSubtitles)");
                 Console.WriteLine("0. 離開");
                 Console.WriteLine("==================");
                 Console.Write("請選擇功能 (輸入數字): ");
@@ -57,6 +61,14 @@ namespace ConvertVideo2GIF
 
                     case "4":
                         HandleCombineAudioAndVideo();
+                        break;
+
+                    case "5":
+                        await HandleCompressVideo();
+                        break;
+
+                    case "6":
+                        HandleGetSubtitles();
                         break;
 
                     case "0":
@@ -149,6 +161,45 @@ namespace ConvertVideo2GIF
             string outputFile = Console.ReadLine() ?? "";
 
             CombineAudioAndVideo(audioFile, videoFile, outputFile);
+        }
+
+        private static async Task HandleCompressVideo()
+        {
+            Console.Write("請輸入影片檔名(含副檔名): ");
+            string inputFile = Console.ReadLine() ?? "";
+            Console.Write("請選擇壓縮方法 (1: H264 | 2: NVENC_H264 | 3: H265 | 4: VP9 | 5: AV1): ");
+            string methodInput = Console.ReadLine() ?? "";
+            if (Enum.TryParse(methodInput, out CompressMethod method))
+            {
+                SpaceSaverHelper spaceSaver = new SpaceSaverHelper();
+                string outputFile = spaceSaver.CompressVideo(inputFile, method);
+
+                // 提取字幕
+                Console.Write("是否提取字幕 (y/n): ");
+                string extractSubtitlesInput = Console.ReadLine() ?? "";
+                if (extractSubtitlesInput.Equals("y", StringComparison.OrdinalIgnoreCase))
+                {
+                    ConvertFileHelper.ExtractSubtitles(inputFile, "7", false, outputFile);
+                }
+            }
+            else
+            {
+                Console.WriteLine("無效的壓縮方法！");
+            }
+        }
+
+        private static void HandleGetSubtitles()
+        {
+            Console.Write("請輸入影片檔名(含副檔名): ");
+            string inputFile = Console.ReadLine() ?? "";
+
+            Console.Write("請輸入字幕 index (例如: 0, 1, 2，留空表示用預設第1軌字幕): ");
+            string methodInput = Console.ReadLine() ?? "";
+
+            Console.Write("是否使用中文標籤找尋字幕軌 (y/n，預設 n): ");
+            string extractSubtitlesInput = Console.ReadLine() ?? "";
+
+            ConvertFileHelper.ExtractSubtitles(inputFile, methodInput, extractSubtitlesInput.Equals("y", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

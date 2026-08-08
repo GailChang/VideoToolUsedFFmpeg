@@ -2,10 +2,10 @@
 {
     public enum CompressMethod
     {
-        H264 = 0,
-        NVENC_H264 = 1,
-        H265 = 2,
-        VP9 = 3,
-        AV1 = 4
+        H264 = 1,
+        NVENC_H264 = 2,
+        H265 = 3,
+        VP9 = 4,
+        AV1 = 5
     }
 }
