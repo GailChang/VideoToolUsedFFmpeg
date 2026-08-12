@@ -123,7 +123,7 @@ namespace ConvertVideo2GIF
 
         private static async Task HandleCutVideo()
         {
-            Console.Write("請輸入影片檔名(不含副檔名): ");
+            Console.Write("請輸入影片檔名(包含副檔名): ");
             string inputFile = Console.ReadLine() ?? "";
 
             Console.Write("請輸入輸出檔名(可留空): ");

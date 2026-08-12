@@ -15,29 +15,23 @@ namespace ConvertVideo2GIF.Helper
         /// <summary>
         /// 剪輯影片
         /// </summary>
-        /// <param name="iFileName">原始檔名(不含副檔名)</param>
+        /// <param name="iFileName">原始檔名(包含副檔名)</param>
         /// <param name="oFileName">輸出檔名</param>
         /// <param name="startTime">開始時間</param>
         /// <param name="endTime">結束時間</param>
         public static async Task CutVideo(string iFileName, string oFileName, string startTime, string endTime)
         {
-            if (string.IsNullOrEmpty(oFileName)) oFileName = iFileName + " - output";
-            DirPathObj dirObj = new DirPathObj(iFileName, oFileName, ".mp4", ".mp4");
-
-            // 讀取影片並確保輸出 影片 儲存的資料夾存在
-            if (!Directory.Exists(dirObj.workingDir))
-            {
-                Directory.CreateDirectory(dirObj.workingDir);
-            }
-
-            // 使用 FileNameHelper 避免檔名衝突
-            dirObj.ResolveFileNameConflict();
+            DirPathObj dirObj = new DirPathObj(iFileName, oFileName + Path.GetExtension(iFileName));
+            if (string.IsNullOrEmpty(oFileName)) dirObj.outFileName = $"{dirObj.inFileName} - output";
 
             if (!File.Exists(dirObj.inputPath))
             {
                 Console.WriteLine("找不到來源影片，影片剪輯失敗!");
                 return;
             }
+
+            // 避免檔名衝突
+            dirObj.ResolveFileNameConflict();
 
             // 現在的語法，結尾可以使用精確到毫秒的時間點，但開頭不行
             string command = $"-ss {startTime} -to {endTime} -i \"{dirObj.inputPath}\" -c copy -avoid_negative_ts 1 \"{dirObj.outputPath}\"";
