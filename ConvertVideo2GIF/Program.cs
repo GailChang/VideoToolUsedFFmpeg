@@ -33,11 +33,12 @@ namespace ConvertVideo2GIF
             {
                 Console.WriteLine("=== 影片處理工具 ===");
                 Console.WriteLine("1. 剪輯影片 (CutVideo)");
-                Console.WriteLine("2. 合併影片 (MergeVideo)");
+                Console.WriteLine("2. 合併兩段影片 (MergeVideo)");
                 Console.WriteLine("3. 調整音量 (AdjustVolume)");
                 Console.WriteLine("4. 合併音訊和影片 (CombineAudioAndVideo)");
-                Console.WriteLine("5. 壓縮轉檔影片 (CompressVideo)");
+                Console.WriteLine("5. 壓縮轉檔影片 (ConvertVideo, CompressVideo)");
                 Console.WriteLine("6. 提取字幕 (ExtractSubtitles)");
+                Console.WriteLine("7. 去除浮水印 (RemoveWatermark)");
                 Console.WriteLine("0. 離開");
                 Console.WriteLine("==================");
                 Console.Write("請選擇功能 (輸入數字): ");
@@ -64,11 +65,15 @@ namespace ConvertVideo2GIF
                         break;
 
                     case "5":
-                        await HandleCompressVideo();
+                        HandleCompressVideo();
                         break;
 
                     case "6":
                         HandleGetSubtitles();
+                        break;
+
+                    case "7":
+                        HandleRemoveWatermark();
                         break;
 
                     case "0":
@@ -163,12 +168,20 @@ namespace ConvertVideo2GIF
             CombineAudioAndVideo(audioFile, videoFile, outputFile);
         }
 
-        private static async Task HandleCompressVideo()
+        private static void HandleCompressVideo()
         {
             Console.Write("請輸入影片檔名(含副檔名): ");
             string inputFile = Console.ReadLine() ?? "";
-            Console.Write("請選擇壓縮方法 (1: H264 | 2: NVENC_H264 | 3: H265 | 4: VP9 | 5: AV1): ");
+            Console.Write("請選擇壓縮方法 (1: H264 | 2: NVENC_H264 | 3: H265 | 4: VP9 | 5: AV1 | 0: 不壓縮只轉檔): ");
             string methodInput = Console.ReadLine() ?? "";
+
+            // 如果使用者輸入 0，則只進行轉檔，不壓縮
+            if (int.TryParse(methodInput, out int methodNumber) && methodNumber == 0)
+            {
+                ConvertFileHelper.ConvertVCodeH264(inputFile);
+                return;
+            }
+
             if (Enum.TryParse(methodInput, out CompressMethod method))
             {
                 SpaceSaverHelper spaceSaver = new SpaceSaverHelper();
@@ -200,6 +213,54 @@ namespace ConvertVideo2GIF
             string extractSubtitlesInput = Console.ReadLine() ?? "";
 
             ConvertFileHelper.ExtractSubtitles(inputFile, methodInput, extractSubtitlesInput.Equals("y", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static void HandleRemoveWatermark()
+        {
+            Console.Write("請輸入影片檔名(不含副檔名): ");
+            string inputFile = Console.ReadLine() ?? "";
+
+            WatermarkHelper.GetScreenShot(inputFile);
+
+            string watermarkPosition = "";
+            string watermarkSize = "";
+            int retryTime = 0;
+
+            if (string.IsNullOrWhiteSpace(watermarkPosition) || string.IsNullOrWhiteSpace(watermarkSize))
+            {
+                if (retryTime > 0)
+                {
+                    Console.WriteLine("浮水印位置或大小輸入不正確，請輸入正確的值！");
+                }
+
+                Console.Write("請輸入浮水印位置 (x,y) 例如: 10,20: ");
+                watermarkPosition = Console.ReadLine() ?? "";
+                Console.Write("請輸入浮水印寬度 (w)、高度(h) 例如: 100,200: ");
+                watermarkSize = Console.ReadLine() ?? "";
+                retryTime++;
+
+                if (retryTime > 10)
+                {
+                    Console.WriteLine("浮水印位置或大小輸入不正確，已達最大重試次數，程式將結束！");
+                    return;
+                }
+            }
+
+            if (watermarkPosition.Split(',').Length != 2 || watermarkSize.Split(',').Length != 2)
+            {
+                Console.WriteLine("浮水印位置或大小格式不正確，程式將結束！");
+                return;
+            }
+
+            WatermarkInfoModel watermarkInfo = new()
+            {
+                PositionX = int.Parse(watermarkPosition.Split(',')[0]),
+                PositionY = int.Parse(watermarkPosition.Split(',')[1]),
+                Width = int.Parse(watermarkSize.Split(',')[0]),
+                Height = int.Parse(watermarkSize.Split(',')[1])
+            };
+
+            WatermarkHelper.RemoveWatermark(inputFile, watermarkInfo);
         }
 
         /// <summary>

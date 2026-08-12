@@ -23,20 +23,10 @@ namespace ConvertVideo2GIF.Helper
                 Console.WriteLine("輸入影片不存在，請確認檔案路徑是否正確！");
                 return;
             }
-            //如果有重複的檔案，則會自動加上 (1)、(2) 等等的後綴
-            bool noConflict = true;
-            string currentName = dirObj.outFileName;
-            for (int i = 1; noConflict; i++)
-            {
-                if (!File.Exists(dirObj.workingDir + currentName + dirObj.outputFormat))
-                {
-                    noConflict = false;
-                    break;
-                }
-                string suffix = "(" + i.ToString() + ")";
-                currentName = dirObj.outFileName + suffix;
-            }
-            dirObj.outFileName = currentName;
+
+            // 使用 FileNameHelper 避免檔名衝突
+            FileNameHelper.ResolveFileNameConflict(dirObj);
+
             try
             {
                 // 使用 FFmpeg 調用進行轉換
@@ -96,6 +86,38 @@ namespace ConvertVideo2GIF.Helper
             await ExecHelper.FFmpegCommandExec(dirObj, command);
 
             Console.WriteLine("影片轉換成 GIF 完成！");
+        }
+
+        /// <summary>
+        /// 轉換編碼格式為 H264。
+        /// 同樣是 MP4，但轉成 H264 編碼格式，此格式對於大部分播放器的相容性較好。
+        /// </summary>
+        /// <param name="inputFileName"></param>
+        /// <returns></returns>
+        public static void ConvertVCodeH264(string inputFileName)
+        {
+            DirPathObj dirObj = new DirPathObj(inputFileName, $"{Path.GetFileNameWithoutExtension(inputFileName)} - output.mp4");
+
+            if (!File.Exists(dirObj.inputPath))
+            {
+                Console.WriteLine("輸入影片不存在，請確認檔案路徑是否正確！");
+                return;
+            }
+
+            // 使用 FileNameHelper 避免檔名衝突
+            FileNameHelper.ResolveFileNameConflict(dirObj);
+
+            try
+            {
+                string command = $"-i \"{dirObj.inputPath}\" -c:v libx264 -crf 18 -maxrate 3.75M -bufsize 7.5M -c:a copy \"{dirObj.outputPath}\"";
+                ExecHelper.FFmpegDebugCommandExec(dirObj, command);
+                Console.WriteLine($"影片轉換成 H264 編碼 {DateTime.Now.ToString("yyyyMMdd HH:mm:ss")} 完成！");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("轉換 MP4 編碼 H264 失敗: " + ex.Message);
+                throw;
+            }
         }
 
         /// <summary>
