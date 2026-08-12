@@ -1,10 +1,15 @@
 ﻿using ConvertVideo2GIF.Enums;
 using ConvertVideo2GIF.Models;
+using FFMpegCore.Arguments;
+using System.Text.Json;
 
 namespace ConvertVideo2GIF.Helper
 {
     public class SpaceSaverHelper
     {
+        private AppSettingsRoot Config { get => new ConfigLoadingHelper().ConfigGetter; }
+        private int Bitrate => Config.Compress.Bitrate;
+
         /// <summary>
         /// 使用指定的壓縮方法壓縮影片
         /// </summary>
@@ -34,13 +39,11 @@ namespace ConvertVideo2GIF.Helper
         /// 使用自訂 FFmpeg 命令列壓縮影片
         /// </summary>
         /// <param name="commandLine">FFmpeg 命令列參數</param>
-        /// <param name="inputFileName">原始檔名(不含副檔名)</param>
+        /// <param name="inputFileName">原始檔名(包含副檔名)</param>
         public void CompressVideo(string commandLine, string inputFileName, string outputFileName)
         {
-            var dirObj = new DirPathObj(
-                Path.GetFileNameWithoutExtension(inputFileName),
-                outputFileName, Path.GetExtension(inputFileName) ?? ".mp4",
-                ".mp4");
+            var dirObj = new DirPathObj(inputFileName, $"{outputFileName}.mp4");
+
             // 讀取影片並確保輸出影片儲存的資料夾存在
             if (!Directory.Exists(dirObj.workingDir))
             {
@@ -62,10 +65,9 @@ namespace ConvertVideo2GIF.Helper
             if (commandLine.Contains("{2}"))
             {
                 // 設定目標位元率 (例如: 5M)
-                int bitrate = 5; // 目標位元率 (Mbps)
-                string targetBitrate = $"{bitrate}M";
-                string maxrate = $"{bitrate * 1.5}M"; // TARGET x 1.5
-                string bufsize = $"{bitrate * 3}M"; // TARGET x 3
+                string targetBitrate = $"{Bitrate}M"; // 目標位元率 (Mbps)
+                string maxrate = $"{Bitrate * 1.5}M"; // TARGET x 1.5
+                string bufsize = $"{Bitrate * 3}M"; // TARGET x 3
                 string ncommand = $"-rc vbr_hq -b:v {targetBitrate} -maxrate {maxrate} -bufsize {bufsize}";
                 command = string.Format(commandLine, dirObj.inputPath, dirObj.outputPath, ncommand);
             }
