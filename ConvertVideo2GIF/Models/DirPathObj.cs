@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using ConvertVideo2GIF.Helper;
+using System.Text.Json;
 
 namespace ConvertVideo2GIF.Models
 {
@@ -35,41 +36,22 @@ namespace ConvertVideo2GIF.Models
             this.outputFormat = outputFormat;
         }
 
+        /// <summary>
+        /// 解決檔名衝突，調用並更新輸出檔名
+        /// </summary>
+        public void ResolveFileNameConflict()
+        {
+            this.outFileName = FileNameHelper.ResolveFileNameConflict(this);
+        }
+
         private static string LoadWorkingDirectoryFromConfig()
         {
             if (_cachedWorkingDir != null)
                 return _cachedWorkingDir;
 
-            try
-            {
-                string configPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
-
-                if (!File.Exists(configPath))
-                {
-                    Console.WriteLine("警告: appsettings.json 不存在，使用預設工作目錄");
-                    _cachedWorkingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads") + Path.DirectorySeparatorChar;
-                    return _cachedWorkingDir;
-                }
-
-                string jsonString = File.ReadAllText(configPath);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var config = JsonSerializer.Deserialize<AppSettingsRoot>(jsonString, options);
-
-                if (config?.AppSettings?.WorkingDirectory != null && !string.IsNullOrWhiteSpace(config.AppSettings.WorkingDirectory))
-                {
-                    _cachedWorkingDir = config.AppSettings.WorkingDirectory;
-                }
-                else
-                {
-                    Console.WriteLine("警告: appsettings.json 中未設定 WorkingDirectory，使用預設工作目錄");
-                    _cachedWorkingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads") + Path.DirectorySeparatorChar;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"讀取設定檔失敗: {ex.Message}，使用預設工作目錄: 使用者/Downloads/");
-                _cachedWorkingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads") + Path.DirectorySeparatorChar;
-            }
+            var loading = new ConfigLoadingHelper();
+            var appSettings = loading.LoadAppSettings();
+            _cachedWorkingDir = appSettings.WorkingDirectory;
 
             return _cachedWorkingDir;
         }

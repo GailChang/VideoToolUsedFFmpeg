@@ -29,62 +29,96 @@ namespace ConvertVideo2GIF
 
             Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss") + "程式執行開始!");
 
-            while (true)
+            var isContinue = true;
+            while (isContinue)
             {
-                Console.WriteLine("=== 影片處理工具 ===");
-                Console.WriteLine("1. 剪輯影片 (CutVideo)");
-                Console.WriteLine("2. 合併兩段影片 (MergeVideo)");
-                Console.WriteLine("3. 調整音量 (AdjustVolume)");
-                Console.WriteLine("4. 合併音訊和影片 (CombineAudioAndVideo)");
-                Console.WriteLine("5. 壓縮轉檔影片 (ConvertVideo, CompressVideo)");
-                Console.WriteLine("6. 提取字幕 (ExtractSubtitles)");
-                Console.WriteLine("7. 去除浮水印 (RemoveWatermark)");
-                Console.WriteLine("0. 離開");
-                Console.WriteLine("==================");
-                Console.Write("請選擇功能 (輸入數字): ");
-
-                string choice = Console.ReadLine() ?? "";
-                Console.WriteLine();
-
-                switch (choice)
-                {
-                    case "1":
-                        await HandleCutVideo();
-                        break;
-
-                    case "2":
-                        await HandleMergeVideo();
-                        break;
-
-                    case "3":
-                        await HandleAdjustVolume();
-                        break;
-
-                    case "4":
-                        HandleCombineAudioAndVideo();
-                        break;
-
-                    case "5":
-                        HandleCompressVideo();
-                        break;
-
-                    case "6":
-                        HandleGetSubtitles();
-                        break;
-
-                    case "7":
-                        HandleRemoveWatermark();
-                        break;
-
-                    case "0":
-                        Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss") + "程式執行結束!");
-                        return;
-
-                    default:
-                        Console.WriteLine("無效的選項，請重新選擇！");
-                        break;
-                }
+                isContinue = await OptionPage1();
             }
+        }
+
+        private static async Task<Boolean> OptionPage1()
+        {
+            Console.WriteLine("=== 影片處理工具 ===");
+            Console.WriteLine("1. 剪輯影片 (CutVideo)");
+            Console.WriteLine("2. 合併兩段影片 (MergeVideo)");
+            Console.WriteLine("3. 提取字幕 (ExtractSubtitles)");
+            Console.WriteLine("4. 去除浮水印 (RemoveWatermark)");
+            Console.WriteLine("5. 壓縮轉檔影片 (ConvertVideo, CompressVideo)");
+            Console.WriteLine("6. 更多功能(下一頁)");
+            Console.WriteLine("0. 離開");
+            Console.WriteLine("==================");
+            Console.Write("請選擇功能 (輸入數字): ");
+
+            string choice = Console.ReadLine() ?? "";
+            Console.WriteLine();
+
+            return await SwitchPageOption(1, choice);
+        }
+
+        private static async Task<Boolean> OptionPage2()
+        {
+            Console.WriteLine("=== 影片處理工具 ===");
+            Console.WriteLine("1. 合併音訊和影片 (CombineAudioAndVideo)");
+            Console.WriteLine("6. (上一頁)");
+            Console.WriteLine("0. 離開");
+            Console.WriteLine("==================");
+            Console.Write("請選擇功能 (輸入數字): ");
+
+            string choice = Console.ReadLine() ?? "";
+            Console.WriteLine();
+
+            return await SwitchPageOption(2, choice);
+        }
+
+        private static async Task<Boolean> SwitchPageOption(int page, string optionNumber)
+        {
+            bool isContinue = true;
+            switch ((page, optionNumber))
+            {
+                case (1, "1"):
+                    await HandleCutVideo();
+                    break;
+
+                case (1, "2"):
+                    await HandleMergeVideo();
+                    break;
+
+                case (1, "3"):
+                    HandleGetSubtitles();
+                    break;
+
+                case (1, "4"):
+                    HandleRemoveWatermark();
+                    break;
+
+                case (1, "5"):
+                    HandleCompressOrConvertVideo();
+                    break;
+
+                case (1, "6"):
+                    await OptionPage2();
+                    break;
+
+                case (2, "6"):
+                    await OptionPage1();
+                    break;
+
+                case (2, "1"):
+                    HandleCombineAudioAndVideo();
+                    break;
+
+                case (1, "0"):
+                case (2, "0"):
+                    Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss") + " 程式執行結束!");
+                    isContinue = false;
+                    break;
+
+                default:
+                    Console.WriteLine("無效的選項，請重新選擇！");
+                    break;
+            }
+            ;
+            return isContinue;
         }
 
         private static async Task HandleCutVideo()
@@ -101,7 +135,7 @@ namespace ConvertVideo2GIF
             Console.Write("請輸入結束時間(格式: HH:MM:SS): ");
             string? endTime = Console.ReadLine();
 
-            await CutVideo(inputFile, outputFile, string.IsNullOrEmpty(startTime) ? "00:00:00" : startTime, string.IsNullOrEmpty(endTime) ? "00:00:00" : endTime);
+            await SplitMergeHelper.CutVideo(inputFile, outputFile, string.IsNullOrEmpty(startTime) ? "00:00:00" : startTime, string.IsNullOrEmpty(endTime) ? "00:00:00" : endTime);
         }
 
         private static async Task HandleMergeVideo()
@@ -125,7 +159,7 @@ namespace ConvertVideo2GIF
 
             if (files.Count > 0)
             {
-                await MergeVideo(files, outputFile);
+                await SplitMergeHelper.MergeVideo(files, outputFile);
             }
             else
             {
@@ -154,25 +188,32 @@ namespace ConvertVideo2GIF
             }
         }
 
+        /// <summary>
+        /// 處理合併音訊和影片所需參數
+        /// </summary>
         private static void HandleCombineAudioAndVideo()
         {
             Console.Write("請輸入音訊檔案名稱(含副檔名): ");
             string audioFile = Console.ReadLine() ?? "";
 
-            Console.Write("請輸入影片檔名(不含副檔名): ");
+            Console.Write("請輸入影片檔名(含副檔名): ");
             string videoFile = Console.ReadLine() ?? "";
 
             Console.Write("請輸入輸出檔名(可留空): ");
             string outputFile = Console.ReadLine() ?? "";
 
-            CombineAudioAndVideo(audioFile, videoFile, outputFile);
+            SplitMergeHelper.CombineAudioAndVideo(audioFile, videoFile, outputFile);
         }
 
-        private static void HandleCompressVideo()
+        /// <summary>
+        /// 處理壓縮檔案或轉檔
+        /// </summary>
+        private static void HandleCompressOrConvertVideo()
         {
             Console.Write("請輸入影片檔名(含副檔名): ");
             string inputFile = Console.ReadLine() ?? "";
-            Console.Write("請選擇壓縮方法 (1: H264 | 2: NVENC_H264 | 3: H265 | 4: VP9 | 5: AV1 | 0: 不壓縮只轉檔): ");
+            Console.WriteLine("請選擇壓縮方法，依跨平臺支援度排名 ↓");
+            Console.Write("(1: H264 | 2: NVENC_H264 | 3: AV1 | 4: H265 | 5: VP9 | 0: 不壓縮只轉檔): ");
             string methodInput = Console.ReadLine() ?? "";
 
             // 如果使用者輸入 0，則只進行轉檔，不壓縮
@@ -201,6 +242,9 @@ namespace ConvertVideo2GIF
             }
         }
 
+        /// <summary>
+        /// 取得 mkv 檔案中的字幕檔
+        /// </summary>
         private static void HandleGetSubtitles()
         {
             Console.Write("請輸入影片檔名(含副檔名): ");
@@ -215,6 +259,9 @@ namespace ConvertVideo2GIF
             ConvertFileHelper.ExtractSubtitles(inputFile, methodInput, extractSubtitlesInput.Equals("y", StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// 去除浮水印(1. 先截圖 2.根據位置去除浮水印)
+        /// </summary>
         private static void HandleRemoveWatermark()
         {
             Console.Write("請輸入影片檔名(不含副檔名): ");
@@ -261,186 +308,6 @@ namespace ConvertVideo2GIF
             };
 
             WatermarkHelper.RemoveWatermark(inputFile, watermarkInfo);
-        }
-
-        /// <summary>
-        /// 剪輯影片
-        /// </summary>
-        /// <param name="iFileName">原始檔名(不含副檔名)</param>
-        /// <param name="oFileName">輸出檔名</param>
-        /// <param name="startTime">開始時間</param>
-        /// <param name="endTime">結束時間</param>
-        private static async Task CutVideo(string iFileName, string oFileName, string startTime, string endTime)
-        {
-            if (string.IsNullOrEmpty(oFileName)) oFileName = iFileName + " - output";
-            DirPathObj dirObj = new DirPathObj(iFileName, oFileName, ".mp4", ".mp4");
-
-            // 讀取影片並確保輸出 影片 儲存的資料夾存在
-            if (!Directory.Exists(dirObj.workingDir))
-            {
-                Directory.CreateDirectory(dirObj.workingDir);
-            }
-
-            // 使用 FileNameHelper 避免檔名衝突
-            dirObj.outFileName = FileNameHelper.ResolveFileNameConflict(dirObj);
-
-            if (!File.Exists(dirObj.inputPath))
-            {
-                Console.WriteLine("找不到來源影片，影片剪輯失敗!");
-                return;
-            }
-
-            // 現在的語法，結尾可以使用精確到毫秒的時間點，但開頭不行
-            string command = $"-ss {startTime} -to {endTime} -i \"{dirObj.inputPath}\" -c copy -avoid_negative_ts 1 \"{dirObj.outputPath}\"";
-
-            await ExecHelper.FFmpegCommandExec(dirObj, command);
-
-            if (File.Exists(dirObj.outputPath))
-                Console.WriteLine("影片剪輯完成！");
-            else
-                Console.WriteLine("影片剪輯失敗!");
-        }
-
-        /// <summary>
-        /// 合併多個影片檔案
-        /// </summary>
-        /// <param name="files">想合併的檔案清單</param>
-        /// <param name="oFileName">輸出檔名</param>
-        private static async Task MergeVideo(List<string> files, string oFileName)
-        {
-            if (files == null || files.Count == 0)
-            {
-                Console.WriteLine("錯誤：沒有提供要合併的檔案清單");
-                return;
-            }
-
-            List<DirPathObj> dirPathObjs = new List<DirPathObj>();
-            List<string> mylist = new List<string>();
-            string mylistPath = "mylist.txt";
-            string mylistFullPath = "";
-
-            // 先驗證每個輸入檔案並收集有效的檔案
-            foreach (string file in files)
-            {
-                DirPathObj ndirObj = new DirPathObj(file, oFileName, ".mp4", ".mp4");
-
-                if (!File.Exists(ndirObj.inputPath))
-                {
-                    Console.WriteLine($"警告：檔案不存在，跳過: {ndirObj.inputPath}");
-                    continue;
-                }
-
-                // 驗證影片檔案完整性
-                if (await ExecHelper.ValidateVideoFile(ndirObj))
-                {
-                    dirPathObjs.Add(ndirObj);
-                    // 使用完整路徑避免路徑問題
-                    mylist.Add($"file '{ndirObj.inputPath.Replace("\\", "/")}'");
-
-                    if (mylistFullPath == "")
-                    {
-                        mylistFullPath = Path.Combine(ndirObj.workingDir, mylistPath);
-                    }
-
-                    Console.WriteLine($"已加入合併清單: {ndirObj.inFileName}{ndirObj.inputFormat}");
-                }
-                else
-                {
-                    Console.WriteLine($"警告：影片檔案驗證失敗，跳過: {ndirObj.inputPath}");
-                }
-            }
-
-            if (dirPathObjs.Count == 0)
-            {
-                Console.WriteLine("錯誤：沒有有效的影片檔案可以合併");
-                return;
-            }
-
-            if (dirPathObjs.Count == 1)
-            {
-                Console.WriteLine("只有一個有效檔案，將直接複製到輸出位置");
-                var singleFile = dirPathObjs[0];
-                try
-                {
-                    File.Copy(singleFile.inputPath, singleFile.outputPath, true);
-                    Console.WriteLine("檔案複製完成！");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"檔案複製失敗: {ex.Message}");
-                }
-                return;
-            }
-
-            string listStr = string.Join($"{Environment.NewLine}", mylist.ToArray());
-
-            try
-            {
-                if (File.Exists(mylistFullPath))
-                {
-                    File.Delete(mylistFullPath);
-                }
-                // 使用不帶 BOM 的 UTF-8 編碼
-                var utf8WithoutBom = new System.Text.UTF8Encoding(false);
-                File.WriteAllText(mylistFullPath, listStr, utf8WithoutBom);
-                Console.WriteLine($"已建立檔案清單: {mylistFullPath}");
-                Console.WriteLine($"清單內容:\n{listStr}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("寫入檔案清單時發生錯誤：" + ex.Message);
-                return;
-            }
-
-            if (!File.Exists(mylistFullPath))
-            {
-                Console.WriteLine("錯誤：無法建立檔案清單");
-                return;
-            }
-
-            DirPathObj dirObj = dirPathObjs[0];
-            // 使用輸出檔名建立正確的輸outputPath物件
-            DirPathObj outputDirObj = new DirPathObj("", oFileName, ".mp4", ".mp4");
-
-            // 讀取影片並確保輸出 影片 儲存的資料夾存在
-            if (!Directory.Exists(outputDirObj.workingDir))
-            {
-                Directory.CreateDirectory(outputDirObj.workingDir);
-            }
-
-            // 使用 FileNameHelper 避免檔名衝突
-            string resolvedFileName = FileNameHelper.ResolveFileNameConflict(outputDirObj);
-            outputDirObj.outFileName = resolvedFileName;
-
-            int count = 0;
-            List<string> tempFileList = new List<string>();
-            foreach (var item in files)
-            {
-                count++;
-                string newCommand = $"ffmpeg -i \"{item}.mp4\" -c copy -bsf:v h264_mp4toannexb -f mpegts temp{count}.ts";
-                var newDir = new DirPathObj(item, $"temp{count}", "mp4", "ts");
-                ExecHelper.FFmpegDebugCommandExec(newDir, newCommand);
-                tempFileList.Add($"temp{count}.ts");
-            }
-
-            string eachFile = string.Join("|", tempFileList);
-            string command = $"ffmpeg -i \"concat:{eachFile}\" -c copy -bsf:a aac_adtstoasc \"{outputDirObj.outFileName}{outputDirObj.outputFormat}\"";
-
-            ExecHelper.FFmpegDebugCommandExec(outputDirObj, command);
-            Console.WriteLine($"{command} 完成");
-
-            // 刪除臨時檔案
-            foreach (var tempFile in tempFileList)
-            {
-                if (File.Exists($"{outputDirObj.workingDir}{tempFile}"))
-                {
-                    File.Delete($"{outputDirObj.workingDir}{tempFile}");
-                }
-            }
-            if (File.Exists(mylistFullPath))
-            {
-                File.Delete(mylistFullPath);
-            }
         }
 
         /// <summary>
@@ -599,45 +466,6 @@ namespace ConvertVideo2GIF
 
             Console.WriteLine();
             Console.WriteLine("=== 畫質比較完成 ===");
-        }
-
-        /// <summary>
-        /// 合併音訊和影片
-        /// </summary>
-        /// <param name="audioFile">音訊檔案名稱</param>
-        /// <param name="videoFile">影片檔案名稱</param>
-        /// <param name="oFileName">輸出檔案名稱</param>
-        private static void CombineAudioAndVideo(string audioFile, string videoFile, string oFileName = "")
-        {
-            // 設定輸出檔案名稱
-            if (string.IsNullOrEmpty(oFileName))
-            {
-                oFileName = $"{videoFile}_output";
-            }
-            var outputDir = new DirPathObj(videoFile, oFileName, ".mp4", ".mp4");
-
-            // 檢查輸入檔案是否存在
-            if (!File.Exists(outputDir.inputPath))
-            {
-                Console.WriteLine($"影片檔案不存在: {outputDir.inputPath}");
-                return;
-            }
-
-            var audioPath = Path.Combine(outputDir.workingDir, audioFile);
-            if (!File.Exists(audioPath))
-            {
-                Console.WriteLine($"音訊檔案不存在: {audioPath}");
-                return;
-            }
-
-            // 使用 FileNameHelper 避免檔名衝突
-            outputDir.outFileName = FileNameHelper.ResolveFileNameConflict(outputDir);
-
-            // 使用FFmpeg合併音訊和影片
-            string command = $"-i \"{outputDir.inputPath}\" -i \"{audioPath}\" -c:v copy -c:a aac -strict experimental \"{outputDir.outputPath}\"";
-            ExecHelper.FFmpegDebugCommandExec(outputDir, command);
-
-            Console.WriteLine($"合併完成，輸出檔案: {oFileName}");
         }
     }
 }

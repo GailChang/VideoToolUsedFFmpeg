@@ -13,42 +13,21 @@ namespace ConvertVideo2GIF.Helper
         public static async Task ConvertMOV2MP4(string inputFileName)
         {
             DirPathObj dirObj = new DirPathObj(inputFileName, ".mov", ".mp4");
-            // 讀取影片並確保輸出 GIF 儲存的資料夾存在
-            if (!Directory.Exists(dirObj.workingDir))
-            {
-                Directory.CreateDirectory(dirObj.workingDir);
-            }
             if (!File.Exists(dirObj.inputPath))
             {
                 Console.WriteLine("輸入影片不存在，請確認檔案路徑是否正確！");
                 return;
             }
 
-            // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            // 避免檔名衝突
+            dirObj.ResolveFileNameConflict();
 
             try
             {
-                // 使用 FFmpeg 調用進行轉換
-                using (Process ffmpegProcess = new Process())
-                {
-                    ffmpegProcess.StartInfo.FileName = dirObj.ffmpegPath;
-                    //-vf scale 重新定義尺寸；-r 幀率
-                    ffmpegProcess.StartInfo.Arguments = $"-i \"{dirObj.inputPath}\" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k \"{dirObj.outputPath}\"";
-                    ffmpegProcess.StartInfo.UseShellExecute = false;
-                    ffmpegProcess.StartInfo.RedirectStandardOutput = true;
-                    ffmpegProcess.StartInfo.RedirectStandardError = true;
-                    ffmpegProcess.StartInfo.CreateNoWindow = true;
-                    ffmpegProcess.Start();
+                string command = $"-i \"{dirObj.inputPath}\" -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k \"{dirObj.outputPath}\"";
 
-                    //string output = await ffmpegProcess.StandardOutput.ReadToEndAsync();
-                    //string error = await ffmpegProcess.StandardError.ReadToEndAsync();
-                    await ffmpegProcess.WaitForExitAsync();
-
-                    Console.WriteLine("影片轉換成 MP4 完成！");
-                    //Console.WriteLine($"標準輸出: {output}");
-                    //Console.WriteLine($"標準錯誤: {error}");
-                }
+                ExecHelper.FFmpegDebugCommandExec(dirObj, command);
+                Console.WriteLine("影片轉換成 MP4 完成！");
             }
             catch (Exception ex)
             {
@@ -65,20 +44,14 @@ namespace ConvertVideo2GIF.Helper
         {
             DirPathObj dirObj = new DirPathObj(inputFileName, ".mp4", ".gif");
 
-            // 讀取影片並確保輸出 GIF 儲存的資料夾存在
-            if (!Directory.Exists(dirObj.workingDir))
-            {
-                Directory.CreateDirectory(dirObj.workingDir);
-            }
-
             if (!File.Exists(dirObj.inputPath))
             {
                 Console.WriteLine("輸入影片不存在，請確認檔案路徑是否正確！");
                 return;
             }
 
-            // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            // 避免檔名衝突
+            dirObj.ResolveFileNameConflict();
 
             //-vf scale 重新定義尺寸；-r 幀率
             string command = $"-i \"{dirObj.inputPath}\" -r 10 \"{dirObj.outputPath}\"";
@@ -105,7 +78,7 @@ namespace ConvertVideo2GIF.Helper
             }
 
             // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            dirObj.ResolveFileNameConflict();
 
             try
             {
@@ -129,12 +102,6 @@ namespace ConvertVideo2GIF.Helper
         {
             DirPathObj dirObj = new DirPathObj(inputFileName, ".webm", ".mp4");
 
-            // 讀取影片並確保輸出 MP4 儲存的資料夾存在
-            if (!Directory.Exists(dirObj.workingDir))
-            {
-                Directory.CreateDirectory(dirObj.workingDir);
-            }
-
             if (!File.Exists(dirObj.inputPath))
             {
                 Console.WriteLine("輸入影片不存在，請確認檔案路徑是否正確！");
@@ -142,13 +109,12 @@ namespace ConvertVideo2GIF.Helper
             }
 
             // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            dirObj.ResolveFileNameConflict();
 
-            //-vf scale 重新定義尺寸；-r 幀率
+            //使用 h264_nvenc 編碼，品質 -cq 23
             string command = $"-i \"{dirObj.inputPath}\" -c:v h264_nvenc -preset p4 -rc vbr -cq 23 -c:a aac -b:a 192k \"{dirObj.outputPath}\"";
 
             ExecHelper.FFmpegDebugCommandExec(dirObj, command);
-
             Console.WriteLine("影片轉換成 MP4 完成！");
         }
 
@@ -176,12 +142,6 @@ namespace ConvertVideo2GIF.Helper
                 ".mkv",
                 ".srt");
 
-            // 讀取影片並確保輸出 SRT 儲存的資料夾存在
-            if (!Directory.Exists(dirObj.workingDir))
-            {
-                Directory.CreateDirectory(dirObj.workingDir);
-            }
-
             if (!File.Exists(dirObj.inputPath))
             {
                 Console.WriteLine("輸入影片不存在，請確認檔案路徑是否正確！");
@@ -189,7 +149,7 @@ namespace ConvertVideo2GIF.Helper
             }
 
             // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            dirObj.ResolveFileNameConflict();
 
             // 提取字幕
             // -map 0:s:0 表示選擇第一個字幕流

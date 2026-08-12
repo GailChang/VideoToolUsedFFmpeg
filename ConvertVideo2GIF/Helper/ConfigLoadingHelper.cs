@@ -34,5 +34,23 @@ namespace ConvertVideo2GIF.Helper
 
             return config;
         }
+
+        /// <summary>
+        /// 讀取 AppSettings 設定
+        /// </summary>
+        /// <returns>AppSettings 物件</returns>
+        public AppSettings LoadAppSettings()
+        {
+            var root = LoadConfig();
+            var appSettings = root.AppSettings;
+            if (string.IsNullOrWhiteSpace(appSettings.WorkingDirectory))
+            {
+                Console.WriteLine("警告: WorkingDirectory 未設定。程式將使用預設工作目錄: \"使用者/Downloads/\"");
+                // 使用預設值
+                appSettings.WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads") + Path.DirectorySeparatorChar;
+            }
+
+            return appSettings;
+        }
     }
 }

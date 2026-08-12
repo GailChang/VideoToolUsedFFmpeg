@@ -19,7 +19,7 @@ namespace ConvertVideo2GIF.Helper
             }
 
             // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            dirObj.ResolveFileNameConflict();
 
             try
             {
@@ -51,7 +51,7 @@ namespace ConvertVideo2GIF.Helper
             }
 
             // 使用 FileNameHelper 避免檔名衝突
-            FileNameHelper.ResolveFileNameConflict(dirObj);
+            dirObj.ResolveFileNameConflict();
 
             try
             {
