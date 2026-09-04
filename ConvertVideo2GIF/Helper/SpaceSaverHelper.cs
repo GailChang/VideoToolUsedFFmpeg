@@ -24,7 +24,7 @@ namespace ConvertVideo2GIF.Helper
                     + "-spatial_aq 1 -aq-strength 10 -temporal-aq 1 "
                     + "-rc-lookahead 32 -profile:v high -pix_fmt yuv420p "
                     + "-c:a copy -movflags +faststart \"{1}\"",
-                CompressMethod.H265 => "-i \"{0}\" -map 0 -c:v libx265 -crf 21 -sn -preset slow -tag:v hvc1 -x265-params aq-mode=3 -c:a copy -movflags +faststart \"{1}\"",
+                CompressMethod.H265 => "-i \"{0}\" -map 0 -c:v libx265 -crf 24 -sn -preset slow -tag:v hvc1 -x265-params aq-mode=3 -c:a copy -movflags +faststart \"{1}\"",
                 CompressMethod.AV1 => "-i \"{0}\" -map 0 -c:v libsvtav1 -crf 28 -sn -preset 6 -g 240 -c:a copy -movflags +faststart \"{1}\"",
                 _ => ""
             };
