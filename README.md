@@ -26,7 +26,7 @@ A powerful .NET 8 console application for video processing operations using FFmp
 
 ### Releases
 
-latest: [20260904:v0.1.0-beta.1]()
+latest: [20260904:v0.1.0-beta.1](https://github.com/GailChang/VideoToolUsedFFmpeg/releases/tag/v0.1.0-beta.1)
 
 ### Self-build
 
