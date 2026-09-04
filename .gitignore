@@ -103,3 +103,4 @@ _ReSharper*/
 *.pidb
 *.sln.iml
 /ConvertVideo2GIF/Properties/PublishProfiles/FolderProfile.pubxml
+/ConvertVideo2GIF/Properties/PublishProfiles/單檔發布.pubxml

@@ -2,9 +2,14 @@
 
 ## 初次使用設定 (First-time Setup)
 
-1. 複製 `appsettings.sample.json` 檔案，並重新命名為 `appsettings.json`
-2. 開啟 `appsettings.json`，修改 `WorkingDirectory` 為你的影片工作目錄
-3. 確保目錄路徑使用雙反斜線 `\\` 或單斜線 `/`
+1. 確定執行檔所在的同資料夾內，為以下檔案結構
+    ┌ Resources
+    |    └ ffmpeg.exe
+    ├ appsettings.sample.json
+    └ ConvertVideo2GIF.exe
+2. 複製 `appsettings.sample.json` 檔案，並重新命名為 `appsettings.json`
+3. 開啟 `appsettings.json`，修改 `WorkingDirectory` 為你的影片工作目錄
+4. 確保目錄路徑使用雙反斜線 `\\` 或單斜線 `/`
 
 ## 設定檔範例 (Configuration Example)
 
@@ -12,6 +17,9 @@
 {
   "AppSettings": {
     "WorkingDirectory": "C:\\Users\\YourUsername\\Downloads\\"
+  },
+  "Compress": {
+    "Bitrate": 7
   }
 }
 ```
@@ -25,7 +33,7 @@
 }
 ```
 
-或使用斜線:
+或使用單斜線:
 ```json
 {
   "AppSettings": {
@@ -45,4 +53,5 @@
 
 | 設定項目 | 說明 | 必填 | 預設值 |
 |---------|------|------|--------|
-| WorkingDirectory | 影片處理的工作目錄 | 否 | %UserProfile%\Downloads\ |
+| WorkingDirectory | 影片處理的工作目錄 | 是 | %UserProfile%\Downloads\ |
+| Compress | nvec 方法壓縮後的 bitrate | 是 | 7 |

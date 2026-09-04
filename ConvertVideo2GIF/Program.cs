@@ -2,11 +2,14 @@
 using ConvertVideo2GIF.Extensions;
 using ConvertVideo2GIF.Helper;
 using ConvertVideo2GIF.Models;
+using System.Diagnostics;
 
 namespace ConvertVideo2GIF
 {
     internal class Program
     {
+        private static string processPath = Environment.ProcessPath ?? "";
+
         /// <summary>
         /// 主程式入口點
         /// </summary>
@@ -24,8 +27,13 @@ namespace ConvertVideo2GIF
                 Console.WriteLine("ffmpeg.exe not found in the Resources folder. Please check the folder and make sure you unzip the ffmpeg.zip.");
                 return;
             }
+
+            // Get Program version
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(processPath);
+            string productVersion = fileVersionInfo.ProductVersion ?? "x.x.x";
+
             // Check the working directory exists
-            Console.WriteLine($"當前 Working directory {dirObj.workingDir} {Environment.NewLine}");
+            Console.WriteLine($"程式版本: ver {productVersion} {Environment.NewLine}當前 Working directory {dirObj.workingDir} {Environment.NewLine}");
 
             Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss") + "程式執行開始!");
 

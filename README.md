@@ -1,8 +1,8 @@
 # ConvertVideo2GIF - FFmpeg Video Processing Tool
 
-A powerful .NET 6 console application for video processing operations using FFmpeg.
+A powerful .NET 8 console application for video processing operations using FFmpeg.
 
-[![.NET Version](https://img.shields.io/badge/.NET-6.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/6.0)
+[![.NET Version](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 
 ## Features
 
@@ -16,15 +16,19 @@ A powerful .NET 6 console application for video processing operations using FFmp
 
 ### Prerequisites
 
-1. **.NET 6.0 SDK or Runtime**
-   - Download from: https://dotnet.microsoft.com/download/dotnet/6.0
+1. **.NET 8.0 SDK or Runtime**
+   - Download from: https://dotnet.microsoft.com/download/dotnet/8.0
 
 2. **FFmpeg**
    - Download from: https://ffmpeg.org/download.html
    - Or Windows builds: https://www.gyan.dev/ffmpeg/builds/
    - Or Unzip `ffpmeg.zip` in the `Resource` folder
 
-### Installation
+### Releases
+
+latest: [20260904:v0.1.0-beta.1]()
+
+### Self-build
 
 1. **Clone the repository**
 
